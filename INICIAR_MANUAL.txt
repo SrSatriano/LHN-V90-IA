@@ -1,0 +1,164 @@
+==============================================================
+LHN Sovereign V90 - Manual Startup Guide / Guia Manual
+==============================================================
+
+ENGLISH
+-------
+
+This guide covers manual startup and separate backend/frontend debugging
+(alternative to INICIAR_SISTEMA_INTEGRADO.bat).
+
+Default ports:
+- Nexus sidecar (optional): 9001
+- FastAPI backend: 9002
+- Next.js frontend: 9090
+- Panel URL: http://127.0.0.1:9090
+
+1) Open PowerShell in the repository root:
+
+   cd "C:\path\to\LHN V90 - Git"
+
+2) Create and activate the Python virtual environment:
+
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   python -m pip install --upgrade pip
+   pip install -r requirements.txt
+
+3) Configure local environment variables:
+
+   copy .env.example .env
+
+   Edit .env locally. Do not commit .env.
+
+4) Start the backend in Terminal 1:
+
+   .\.venv\Scripts\Activate.ps1
+   cd backend
+   python -m uvicorn server:app --host 127.0.0.1 --port 9002
+
+5) Start the frontend in Terminal 2:
+
+   cd frontend
+   npm install
+   npm run dev
+
+6) Open the panel:
+
+   http://127.0.0.1:9090
+
+7) Optional Nexus sidecar:
+
+   .\.venv\Scripts\Activate.ps1
+   cd backend
+   python nexus_chat.py
+
+8) If a port is already in use:
+
+   netstat -ano | findstr :9002
+   netstat -ano | findstr :9090
+
+   Then stop the listed process from Task Manager or with:
+
+   taskkill /PID <PID> /F
+
+9) PowerShell execution policy issue:
+
+   If Activate.ps1 is blocked, run once:
+
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+
+PORTUGUES
+---------
+
+Este guia cobre arranque manual e depuracao separada de backend e frontend
+(alternativa ao INICIAR_SISTEMA_INTEGRADO.bat).
+
+Portas padrao:
+- Sidecar Nexus (opcional): 9001
+- Backend FastAPI: 9002
+- Frontend Next.js: 9090
+- URL do painel: http://127.0.0.1:9090
+
+1) Abra o PowerShell na raiz do repositorio:
+
+   cd "C:\caminho\para\LHN V90 - Git"
+
+2) Crie e ative o ambiente virtual Python:
+
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   python -m pip install --upgrade pip
+   pip install -r requirements.txt
+
+3) Configure as variaveis locais:
+
+   copy .env.example .env
+
+   Edite o .env localmente. Nao faca commit do .env.
+
+4) Inicie o backend no Terminal 1:
+
+   .\.venv\Scripts\Activate.ps1
+   cd backend
+   python -m uvicorn server:app --host 127.0.0.1 --port 9002
+
+5) Inicie o frontend no Terminal 2:
+
+   cd frontend
+   npm install
+   npm run dev
+
+6) Abra o painel:
+
+   http://127.0.0.1:9090
+
+7) Sidecar Nexus opcional:
+
+   .\.venv\Scripts\Activate.ps1
+   cd backend
+   python nexus_chat.py
+
+8) Se uma porta estiver ocupada:
+
+   netstat -ano | findstr :9002
+   netstat -ano | findstr :9090
+
+   Depois encerre o processo pelo Gerenciador de Tarefas ou com:
+
+   taskkill /PID <PID> /F
+
+9) Erro de politica de execucao no PowerShell:
+
+   Se o Activate.ps1 for bloqueado, execute uma vez:
+
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+==============================================================
+Safety / Seguranca
+==============================================================
+
+- Start in simulation mode.
+- Never commit .env, .enc, SQLite, Parquet, logs, or model files.
+- Keep real API keys outside Git.
+- Validate risk settings before live execution.
+
+- Comece em modo simulacao.
+- Nunca versione .env, .enc, SQLite, Parquet, logs ou modelos.
+- Mantenha chaves reais fora do Git.
+- Valide os parametros de risco antes de operar em conta real.
+
+==============================================================
+License (GitHub) / Licenca (GitHub)
+==============================================================
+
+EN: On a new GitHub repository, the "Add a license" menu lists only a few
+    common templates. PolyForm Noncommercial 1.0.0 is not in that list;
+    that is expected. The governing text is the LICENSE file at the repo
+    root (and NOTICE / COMMERCIAL_USE.md). Full context: README.md.
+
+PT: Em repositorio novo no GitHub, o menu "Add a license" lista so alguns
+    modelos. A PolyForm Noncommercial 1.0.0 nao consta; e o esperado.
+    O que prevalece e o LICENSE na raiz (e NOTICE, COMMERCIAL_USE.md).
+    Contexto completo: README.md.
