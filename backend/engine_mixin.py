@@ -1,4 +1,5 @@
 # EngineMixin auto-extracted
+import concurrent.futures
 import contextlib
 import copy
 import os
@@ -4768,9 +4769,50 @@ class EngineMixin:
                     params["timeInForce"] = "GTC"
                     params["price"] = preco_fmt
 
-                asyncio.run_coroutine_threadsafe(
-                    self._enviar_ordem_ws("order.place", params), self.loop_async
-                )
+                loop_hft = getattr(self, "loop_async", None)
+                if loop_hft is not None and loop_hft.is_running():
+                    fut = asyncio.run_coroutine_threadsafe(
+                        self._enviar_ordem_ws("order.place", params), loop_hft
+                    )
+                    try:
+                        fut.result(timeout=120.0)
+                    except concurrent.futures.TimeoutError:
+                        self.erro_msg(
+                            f"FALHA CORRETORA ({ativo}): timeout aguardando confirmação "
+                            "da ordem HFT (120s)."
+                        )
+                        return False, 0, 0.0
+                else:
+                    self.log_msg(
+                        "⚠️ ROTEAMENTO HFT: loop assíncrono indisponível; "
+                        "enviando ordem via REST síncrono."
+                    )
+                    if tipo_exec == "TAKER":
+                        client.place_order(
+                            category="linear",
+                            symbol=ativo,
+                            side=bside,
+                            orderType="Market",
+                            qty=qty_str,
+                            positionIdx=0,
+                        )
+                    else:
+                        price_precision = 0
+                        if tick_size < 1:
+                            price_precision = len(
+                                f"{tick_size:.8f}".rstrip("0").split(".")[1]
+                            )
+                        preco_fmt = f"{preco_atual:.{price_precision}f}"
+                        client.place_order(
+                            category="linear",
+                            symbol=ativo,
+                            side=bside,
+                            orderType="Limit",
+                            qty=qty_str,
+                            price=preco_fmt,
+                            timeInForce="GTC",
+                            positionIdx=0,
+                        )
             else:
                 self.log_msg(f"📡 ROTEAMENTO REST: Disparando {lado} ({tipo_exec})...")
                 if tipo_exec == "TAKER":
